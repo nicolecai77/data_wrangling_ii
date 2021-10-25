@@ -172,5 +172,94 @@ data_marj %>%
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
+## Weather data
+
+```{r}
+weather_df = 
+  rnoaa::meteo_pull_monitors(
+    c("USW00094728", "USC00519397", "USS0023B17S"),
+    var = c("PRCP", "TMIN", "TMAX"), 
+    date_min = "2017-01-01",
+    date_max = "2017-12-31") %>%
+  mutate(
+    name = recode(
+      id, 
+      USW00094728 = "CentralPark_NY", 
+      USC00519397 = "Waikiki_HA",
+      USS0023B17S = "Waterhole_WA"),
+    tmin = tmin / 10,
+    tmax = tmax / 10) %>%
+  select(name, id, everything())
+```
 
 
+let Waikiki_HA becomes the first order in my data set
+```{r}
+weather_df %>% 
+  mutate(name = fct_relevel(name,"Waikiki_HA")) %>% 
+  ggplot(aes(x=name,y=tmax))+
+  geom_violin()
+```
+name in order according to the tmax
+```{r}
+weather_df %>% 
+  mutate(name = fct_reorder(name,tmax)) %>% 
+  ggplot(aes(x=name,y=tmax))+
+  geom_violin()
+```
+
+linear regression 
+```{r}
+weather_df %>% 
+  lm(tmax~name,data=.)
+```
+## Restaurant Inspections 
+```{r}
+data("rest_inspec")
+rest_inspec %>% 
+  janitor::tabyl(boro,grade)
+```
+
+str_to_title --change MANHATTAN to Manhattan
+```{r}
+rest_inspec =rest_inspec %>% 
+  filter(str_detect(grade,"[ABC]"),
+   boro != "Missing") %>% 
+  mutate(boro = str_to_title(boro))
+         
+```
+```{r}
+rest_inspec %>% 
+  filter(str_detect(dba,"[Pp][Ii][Zz][Zz][Aa]")) %>% 
+  janitor::tabyl(boro,grade)
+```
+
+fill=grade,sperate by the grade 
+fct_infreq --change in the frequency you see the thing
+```{r}
+rest_inspec %>% 
+  filter(str_detect(dba,"[Pp][Ii][Zz][Zz][Aa]")) %>% 
+  mutate(
+    boro = fct_infreq(boro)) %>% 
+  ggplot(aes(boro,fill=grade))+geom_bar()
+```
+this does not work to rearrange the frequency because you first put the data into factor and then change into the string
+
+```{r}
+rest_inspec %>% 
+  filter(str_detect(dba,"[Pp][Ii][Zz][Zz][Aa]")) %>% 
+  mutate(
+    boro = fct_infreq(boro),
+    boro = str_replace(boro,"Manhattan","The City")) %>% 
+  ggplot(aes(boro,fill=grade))+geom_bar()
+```
+
+
+```{r}
+rest_inspec %>% 
+  filter(str_detect(dba,"[Pp][Ii][Zz][Zz][Aa]")) %>% 
+  mutate(
+    boro = fct_infreq(boro),
+    boro = fct_recode(boro,"The City"= "Manhattan")) %>% 
+  ggplot(aes(boro,fill=grade))+geom_bar()
+```
