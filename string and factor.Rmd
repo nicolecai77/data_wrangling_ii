@@ -160,8 +160,16 @@ data_marj =
 ```
 
 
-```{r}
+# NSDUH --- factors 
+rotate the x variable name -- theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
+```{r}
+data_marj %>%
+  filter(age == "12-17") %>% 
+  mutate(State = fct_reorder(State, percent)) %>% 
+  ggplot(aes(x = State, y = percent, color = year)) + 
+  geom_point() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 

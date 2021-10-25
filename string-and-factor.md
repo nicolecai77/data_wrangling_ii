@@ -203,4 +203,20 @@ data_marj =
   filter(!(State %in% c("Total U.S.", "Northeast", "Midwest", "South", "West")))
 ```
 
+# NSDUH — factors
+
+rotate the x variable name – theme(axis.text.x = element\_text(angle =
+90, hjust = 1))
+
+``` r
+data_marj %>%
+  filter(age == "12-17") %>% 
+  mutate(State = fct_reorder(State, percent)) %>% 
+  ggplot(aes(x = State, y = percent, color = year)) + 
+  geom_point() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+<img src="string-and-factor_files/figure-gfm/unnamed-chunk-11-1.png" width="90%" />
+
 [1] 0-9
